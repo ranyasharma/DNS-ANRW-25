@@ -1,0 +1,69 @@
+\section{Background and Related Work}\label{sec:background}
+
+In this section, we provide background on encrypted DNS protocols, including
+the current deployment status of encrypted DNS, as well as various related
+work on measuring encrypted DNS.
+
+\subsection{Background: Encrypted DNS}
+
+The Domain Name System (DNS) translates human-readable domain names into
+Internet Protocol (IP) addresses, which are used to route
+traffic~\cite{rfc1035}.  These queries have typically been unencrypted, which
+enables on-path eavesdroppers to intercept queries and manipulate responses.
+
+
+\paragraph{Encrypted DNS}
+Protocols for encrypting DNS traffic have been deployed in recent years, including DNS-over-HTTPS (DoH) and DNS-over-TLS
+(DoT).  Zhu et al. proposed DoT in 2016, which uses a dedicated port (853)
+to communicate with resolvers over a TLS connection~\cite{zhu2015connection}. In contrast,
+DoH---proposed by Hoffman et al. in 2018---establishes HTTPS sessions with
+resolvers over port 443~\cite{rfc8484}.  This design decision enables
+DoH traffic to use HTTPS as a transport, facilitating deployment as well as
+making it difficult for network operators and eavesdroppers to intercept DNS
+queries and responses~\cite{boettger2019empirical}. DoH can function in many
+environments where DoT is easily blocked.
+
+\paragraph{Moving the privacy threat.} Encrypting DNS queries and responses hides queries
+from eavesdroppers but the recipient of the queries---the DNS resolver---can
+see the queries~\cite{IEEEfight}. By design, recursive resolvers receive
+queries from clients and typically need to perform additional queries to a
+series of authoritative name servers to resolve domain names.  For these
+resolvers to determine the additional queries they need to perform (or
+determine if the query can be answered from cache), they must be able to see
+the queries that they receive from clients.  Thus, although DoT and DoH make
+it difficult for eavesdroppers along an intermediate network path to see DNS
+traffic, recursive resolvers can still observe (and potentially, log) the
+queries that they receive from clients.  The fact that many mainstream DoH
+providers (e.g., Google) already collect significant information about users
+potentially raises additional privacy concerns and makes it appealing for
+users to have a large number of encrypted DNS resolvers that are reliable and
+perform well. For this reason, users may wish to have more control over the
+recursive resolver that they use to resolve encrypted DNS queries. Having
+a reasonable set of choices that perform well in the first place is thus
+important, and determining whether such a set exists is the focus of this
+paper.
+
+\subsection{Related Work}
+
+\paragraph{Previous measurement studies of encrypted DNS.}
+Previous studies have typically measured DoT and DoH response times the
+protocols from the perspective of a few commonly used
+resolvers~\cite{lu2019end-to-end}; in contrast, in this paper, we study a much
+larger set of encrypted DNS resolvers, many of which are not available as
+default options in major browsers. 
+
+Hounsel et al. measure response times
+and page load times for DNS, DoT, and DoH using Amazon EC2
+instances~\cite{hounsel2020comparing}.  They compare the recursive resolvers
+for Cloudflare, Google, and Quad9 to the local recursive resolvers provided by
+Amazon EC2 from five global vantage points. They find that despite higher response times, page load times
+for DoT and DoH can be \emph{faster} than DNS on lossy networks.  Lu et al.
+utilized residential TCP SOCKS networks to measure response times from 166
+countries and found that, in the median case with connection re-use, DoT and
+DoH were slower than conventional DNS over TCP by 9 ms and 6 ms,
+respectively~\cite{lu2019end-to-end}.
+In contrast to previous work, our focus in this paper is not to measure the
+DoH protocol itself or its relative performance to unencrypted DNS; instead,
+our goal is to compare the performance of encrypted DNS resolvers {\em to
+each other}, to understand the extent to which this larger set of DNS
+resolvers could be used by clients and applications in different regions.
